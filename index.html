@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Wildlife Immobilization Logger</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add to home screen for Safari on iOS -->
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Wildlife Immobilization Logger</h1>
+        </header>
+        
+        <nav id="tab-navigation">
+            <ul class="tabs">
+                <li data-tab="animal-info" class="active"><i class="fas fa-paw"></i> Animal Info</li>
+                <li data-tab="drug-dose"><i class="fas fa-syringe"></i> Drug & Dose</li>
+                <li data-tab="monitoring"><i class="fas fa-heartbeat"></i> Monitoring</li>
+                <li data-tab="recovery"><i class="fas fa-walking"></i> Recovery</li>
+                <li data-tab="morphometry"><i class="fas fa-ruler"></i> Morphometry</li>
+                <li data-tab="saved-sessions"><i class="fas fa-history"></i> Saved Sessions</li>
+                <li data-tab="export"><i class="fas fa-file-export"></i> Export</li>
+            </ul>
+        </nav>
+        
+        <main id="content">
+            <!-- Animal Information Tab -->
+            <section id="animal-info" class="tab-content active">
+                <h2>Animal Information</h2>
+                <form id="animal-info-form">
+                    <div class="form-group">
+                        <label for="date-time">Date and Time:</label>
+                        <input type="datetime-local" id="date-time" name="date-time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gps-latitude">GPS Latitude:</label>
+                        <input type="number" step="any" id="gps-latitude" name="gps-latitude" required>
+                        <button type="button" id="get-location" class="secondary-btn">Get Current Location</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gps-longitude">GPS Longitude:</label>
+                        <input type="number" step="any" id="gps-longitude" name="gps-longitude" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="animal-id">Animal ID:</label>
+                        <input type="text" id="animal-id" name="animal-id" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="species">Species:</label>
+                        <select id="species" name="species" required>
+                            <option value="">Select species</option>
+                            <option value="Tiger">Tiger</option>
+                            <option value="Leopard">Leopard</option>
+                            <option value="Dhole">Dhole</option>
+                            <option value="Sloth Bear">Sloth Bear</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estimated-weight">Estimated Weight (kg):</label>
+                        <input type="number" step="0.1" id="estimated-weight" name="estimated-weight" required>
+                    </div>
+                    
+                    <button type="button" id="save-animal-info" class="primary-btn">Save & Continue</button>
+                </form>
+            </section>
+            
+            <!-- Drug & Dose Calculator Tab -->
+            <section id="drug-dose" class="tab-content">
+                <h2>Drug & Dose Calculator</h2>
+                
+                <div class="drug-repository">
+                    <h3>Drug Repository</h3>
+                    <div class="form-group">
+                        <label for="new-drug-name">Drug Name:</label>
+                        <input type="text" id="new-drug-name" name="new-drug-name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-drug-category">Category:</label>
+                        <select id="new-drug-category" name="new-drug-category">
+                            <option value="immobilization">Immobilization</option>
+                            <option value="reversal">Reversal</option>
+                            <option value="emergency">Emergency</option>
+                        </select>
+                    </div>
+                    
+                    <button type="button" id="add-drug-to-repository" class="secondary-btn">Add to Repository</button>
+                    
+                    <div class="drug-list-container">
+                        <h4>Saved Drugs:</h4>
+                        <ul id="drug-repository-list"></ul>
+                    </div>
+                </div>
+                
+                <div class="drug-calculator">
+                    <h3>Drug Selection & Calculation</h3>
+                    
+                    <div class="drug-category" id="immobilization-drugs">
+                        <h4>Immobilization Drugs</h4>
+                        <div class="drug-entry">
+                            <div class="form-group">
+                                <label for="immob-drug">Select Drug:</label>
+                                <select class="drug-select" data-category="immobilization"></select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="immob-concentration">Concentration (mg/ml):</label>
+                                <input type="number" step="0.01" class="drug-concentration">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="immob-dose">Dose (mg/kg):</label>
+                                <input type="number" step="0.001" class="drug-dose">
+                            </div>
+                            
+                            <div class="result">
+                                <span>Volume to administer:</span>
+                                <span class="calculated-volume">0.00</span> ml
+                            </div>
+                        </div>
+                        <button type="button" class="add-drug-entry secondary-btn" data-category="immobilization">+ Add Another</button>
+                    </div>
+                    
+                    <div class="drug-category" id="reversal-drugs">
+                        <h4>Reversal Drugs</h4>
+                        <div class="drug-entry">
+                            <div class="form-group">
+                                <label for="reversal-drug">Select Drug:</label>
+                                <select class="drug-select" data-category="reversal"></select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reversal-concentration">Concentration (mg/ml):</label>
+                                <input type="number" step="0.01" class="drug-concentration">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reversal-dose">Dose (mg/kg):</label>
+                                <input type="number" step="0.001" class="drug-dose">
+                            </div>
+                            
+                            <div class="result">
+                                <span>Volume to administer:</span>
+                                <span class="calculated-volume">0.00</span> ml
+                            </div>
+                        </div>
+                        <button type="button" class="add-drug-entry secondary-btn" data-category="reversal">+ Add Another</button>
+                    </div>
+                    
+                    <div class="drug-category" id="emergency-drugs">
+                        <h4>Emergency Drugs</h4>
+                        <div class="drug-entry">
+                            <div class="form-group">
+                                <label for="emergency-drug">Select Drug:</label>
+                                <select class="drug-select" data-category="emergency"></select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="emergency-concentration">Concentration (mg/ml):</label>
+                                <input type="number" step="0.01" class="drug-concentration">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="emergency-dose">Dose (mg/kg):</label>
+                                <input type="number" step="0.001" class="drug-dose">
+                            </div>
+                            
+                            <div class="result">
+                                <span>Volume to administer:</span>
+                                <span class="calculated-volume">0.00</span> ml
+                            </div>
+                        </div>
+                        <button type="button" class="add-drug-entry secondary-btn" data-category="emergency">+ Add Another</button>
+                    </div>
+                    
+                    <button type="button" id="save-drug-dose" class="primary-btn">Save & Continue</button>
+                </div>
+            </section>
+            
+            <!-- Monitoring Tab -->
+            <section id="monitoring" class="tab-content">
+                <h2>Monitoring</h2>
+                
+                <div class="monitoring-controls">
+                    <div class="timer-container">
+                        <div id="timer">00:00:00</div>
+                        <div class="timer-controls">
+                            <button type="button" id="start-timer" class="primary-btn">Start Timer</button>
+                            <button type="button" id="reset-timer" class="secondary-btn">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="event-buttons">
+                        <h3>Quick Events</h3>
+                        <div class="event-button-group">
+                            <button type="button" id="event-dart" class="event-btn">
+                                <i class="fas fa-bullseye"></i> Dart Hit
+                            </button>
+                            <button type="button" id="event-head-down" class="event-btn">
+                                <i class="fas fa-arrow-down"></i> Head Down
+                            </button>
+                            <button type="button" id="event-induction" class="event-btn">
+                                <i class="fas fa-clock"></i> Induction
+                            </button>
+                            <button type="button" id="event-reversal" class="event-btn">
+                                <i class="fas fa-syringe"></i> Reversal
+                            </button>
+                        </div>
+                        <div class="event-button-group">
+                            <button type="button" id="event-ocular" class="event-btn">
+                                <i class="fas fa-eye"></i> Ocular
+                            </button>
+                            <button type="button" id="event-eye-twitch" class="event-btn">
+                                <i class="fas fa-eye"></i> Eye Twitch
+                            </button>
+                            <button type="button" id="event-head-lift" class="event-btn">
+                                <i class="fas fa-arrow-up"></i> Head Lift
+                            </button>
+                            <button type="button" id="event-sternal" class="event-btn">
+                                <i class="fas fa-user"></i> Sternal
+                            </button>
+                            <button type="button" id="event-stand-up" class="event-btn">
+                                <i class="fas fa-walking"></i> Stand Up
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="monitoring-form">
+                    <h3>Add Monitoring Log</h3>
+                    <div class="form-group">
+                        <label for="monitoring-time">Time:</label>
+                        <input type="time" id="monitoring-time" name="monitoring-time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="heart-rate">Heart Rate (beats/min):</label>
+                        <input type="number" id="heart-rate" name="heart-rate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="respiratory-rate">Respiratory Rate (breaths/min):</label>
+                        <input type="number" id="respiratory-rate" name="respiratory-rate" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C):</label>
+                        <input type="number" step="0.1" id="temperature" name="temperature" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="spo2">SpO₂ (%):</label>
+                        <input type="number" id="spo2" name="spo2" required>
+                    </div>
+                    
+                    <button type="button" id="add-monitoring-log" class="primary-btn">Add Log Entry</button>
+                </div>
+                
+                <div class="monitoring-logs">
+                    <h3>Monitoring Logs</h3>
+                    <table id="monitoring-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>HR</th>
+                                <th>RR</th>
+                                <th>Temp</th>
+                                <th>SpO₂</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitoring-log-entries">
+                            <!-- Log entries will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Recovery Events Tab -->
+            <section id="recovery" class="tab-content">
+                <h2>Recovery Events</h2>
+                
+                <div class="recovery-form">
+                    <h3>Log Recovery Event</h3>
+                    <div class="form-group">
+                        <label for="event-time">Time:</label>
+                        <input type="time" id="event-time" name="event-time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-description">Event Description:</label>
+                        <input type="text" id="event-description" name="event-description" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-notes">Notes:</label>
+                        <textarea id="event-notes" name="event-notes" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="button" id="add-recovery-event" class="primary-btn">Add Event</button>
+                </div>
+                
+                <div class="recovery-logs">
+                    <h3>Recovery Log</h3>
+                    <table id="recovery-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Description</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recovery-event-entries">
+                            <!-- Recovery events will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <!-- Morphometry Tab -->
+            <section id="morphometry" class="tab-content">
+                <h2>Morphometry</h2>
+                <form id="morphometry-form">
+                    <div class="form-section">
+                        <h3>Canine Lengths (cm)</h3>
+                        <div class="form-group">
+                            <label for="upper-left-canine">Upper Left:</label>
+                            <input type="number" step="0.1" id="upper-left-canine" name="upper-left-canine">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="upper-right-canine">Upper Right:</label>
+                            <input type="number" step="0.1" id="upper-right-canine" name="upper-right-canine">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lower-left-canine">Lower Left:</label>
+                            <input type="number" step="0.1" id="lower-left-canine" name="lower-left-canine">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lower-right-canine">Lower Right:</label>
+                            <input type="number" step="0.1" id="lower-right-canine" name="lower-right-canine">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Intercanine Distances (cm)</h3>
+                        <div class="form-group">
+                            <label for="upper-intercanine">Upper:</label>
+                            <input type="number" step="0.1" id="upper-intercanine" name="upper-intercanine">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lower-intercanine">Lower:</label>
+                            <input type="number" step="0.1" id="lower-intercanine" name="lower-intercanine">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>Body Measurements (cm)</h3>
+                        <div class="form-group">
+                            <label for="neck-girth">Neck Girth:</label>
+                            <input type="number" step="0.1" id="neck-girth" name="neck-girth">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cranial-length">Cranial Length:</label>
+                            <input type="number" step="0.1" id="cranial-length" name="cranial-length">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="body-length">Body Length:</label>
+                            <input type="number" step="0.1" id="body-length" name="body-length">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tail-length">Tail Length:</label>
+                            <input type="number" step="0.1" id="tail-length" name="tail-length">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="forelimb-length">Forelimb Length:</label>
+                            <input type="number" step="0.1" id="forelimb-length" name="forelimb-length">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="hindlimb-length">Hindlimb Length:</label>
+                            <input type="number" step="0.1" id="hindlimb-length" name="hindlimb-length">
+                        </div>
+                    </div>
+                    
+                    <button type="button" id="save-morphometry" class="primary-btn">Save Measurements</button>
+                </form>
+            </section>
+            
+            <!-- Export Tab -->
+            <section id="export" class="tab-content">
+                <h2>Save & Export</h2>
+                
+                <div class="export-options">
+                    <p>Generate a PDF report with all gathered information:</p>
+                    <button type="button" id="generate-pdf" class="primary-btn"><i class="fas fa-file-pdf"></i> Generate PDF Report</button>
+                </div>
+                
+                <div class="data-management">
+                    <h3>Data Management</h3>
+                    <button type="button" id="save-session" class="secondary-btn"><i class="fas fa-save"></i> Save Current Session</button>
+                    <button type="button" id="clear-session" class="danger-btn"><i class="fas fa-trash"></i> Clear Current Session</button>
+                </div>
+            </section>
+            
+            <!-- Saved Sessions Tab -->
+            <section id="saved-sessions" class="tab-content">
+                <h2>Saved Sessions</h2>
+                <div class="saved-sessions-container">
+                    <div class="sessions-list" id="sessions-list">
+                        <!-- Sessions will be loaded here -->
+                        <p class="no-sessions">No saved sessions found.</p>
+                    </div>
+                    <div class="session-details" id="session-details">
+                        <p>Select a session to view details</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <div id="notification" class="notification"></div>
+    </div>
+    
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="js/storage.js"></script>
+    <script src="js/ui-manager.js"></script>
+    <script src="js/pdf-generator.js"></script>
+    <script src="js/drug-dose.js"></script>
+    <script src="js/monitoring.js"></script>
+    <script src="js/recovery.js"></script>
+    <script src="js/morphometry.js"></script>
+    <script src="js/saved-sessions.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
