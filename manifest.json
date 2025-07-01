@@ -2,10 +2,13 @@
   "name": "Wildlife Immobilization Logger",
   "short_name": "Immo Logger",
   "description": "A mobile app for logging carnivore immobilization events in Central India",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2e7d32",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "img/icon-192.png",
@@ -18,6 +21,52 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "img/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "img/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "App Home Screen"
+    }
+  ],
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "New Immobilization",
+      "short_name": "New",
+      "description": "Start a new immobilization record",
+      "url": "/?new=true",
+      "icons": [{ "src": "img/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "View History",
+      "short_name": "History",
+      "description": "View previous immobilization records",
+      "url": "/#saved-sessions",
+      "icons": [{ "src": "img/icon-96.png", "sizes": "96x96" }]
     }
   ]
 }

@@ -1,7 +1,8 @@
 // Service Worker for Wildlife Immobilization Logger
 // Enables offline functionality
 
-const CACHE_NAME = 'immo-app-v1';
+const CACHE_NAME = 'immo-app-v2';
+const RUNTIME_CACHE = 'immo-runtime-v1';
 
 // Files to cache for offline use
 const filesToCache = [
@@ -9,17 +10,20 @@ const filesToCache = [
   '/index.html',
   '/css/styles.css',
   '/js/storage.js',
-  '/js/ui.js',
+  '/js/ui-manager.js',
   '/js/animal-info.js',
   '/js/drug-dose.js',
   '/js/monitoring.js',
   '/js/recovery.js',
   '/js/morphometry.js',
   '/js/pdf-generator.js',
-  '/js/app.js',
+  '/js/saved-sessions.js',
   '/manifest.json',
+  '/img/icon-192.png',
+  '/img/icon-512.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
 ];
 

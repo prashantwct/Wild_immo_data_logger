@@ -455,6 +455,39 @@
     <script src="js/recovery.js"></script>
     <script src="js/morphometry.js"></script>
     <script src="js/saved-sessions.js"></script>
-    <script src="js/app.js"></script>
+    
+    <!-- Initialize App -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swUrl = '/service-worker.js';
+                
+                // Register the service worker
+                navigator.serviceWorker.register(swUrl).then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }).catch(error => {
+                    console.error('ServiceWorker registration failed: ', error);
+                });
+            });
+        }
+        
+        // Initialize the app after all scripts are loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we're in a secure context (HTTPS or localhost)
+            const isSecure = window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+            
+            if (!isSecure) {
+                console.warn('App is not running in a secure context. Some features may not work.');
+            }
+            
+            // Initialize the app
+            if (typeof App !== 'undefined') {
+                App.init();
+            }
+        });
+    </script>
 </body>
 </html>
