@@ -441,53 +441,84 @@
         <div id="notification" class="notification"></div>
     </div>
     
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- App Scripts -->
-    <script src="js/storage.js"></script>
-    <script src="js/ui-manager.js"></script>
-    <script src="js/pdf-generator.js"></script>
-    <script src="js/drug-dose.js"></script>
-    <script src="js/monitoring.js"></script>
-    <script src="js/recovery.js"></script>
-    <script src="js/morphometry.js"></script>
-    <script src="js/saved-sessions.js"></script>
-    
-    <!-- Initialize App -->
+    <!-- External Libraries with error handling -->
     <script>
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                const swUrl = '/service-worker.js';
-                
-                // Register the service worker
-                navigator.serviceWorker.register(swUrl).then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }).catch(error => {
-                    console.error('ServiceWorker registration failed: ', error);
-                });
+        // Function to load scripts with error handling
+        function loadScript(src, onload) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    console.log(`Loaded: ${src}`);
+                    if (onload) onload();
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error(`Failed to load: ${src}`);
+                    reject(new Error(`Failed to load script: ${src}`));
+                };
+                document.body.appendChild(script);
             });
         }
+
+        // Function to initialize the app
+        async function initializeApp() {
+            try {
+                console.log('Initializing app...');
+                
+                // Load external libraries
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js');
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+                
+                // Load app scripts in order
+                await loadScript('js/storage.js');
+                await loadScript('js/ui-manager.js');
+                await loadScript('js/pdf-generator.js');
+                await loadScript('js/animal-info.js');
+                await loadScript('js/drug-dose.js');
+                await loadScript('js/monitoring.js');
+                await loadScript('js/recovery.js');
+                await loadScript('js/morphometry.js');
+                await loadScript('js/saved-sessions.js');
+                await loadScript('js/app.js');
+                
+                console.log('All scripts loaded successfully');
+                
+                // Register Service Worker
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        const swUrl = '/service-worker.js';
+                        navigator.serviceWorker.register(swUrl)
+                            .then(registration => {
+                                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                            })
+                            .catch(error => {
+                                console.error('ServiceWorker registration failed: ', error);
+                            });
+                    });
+                }
+                
+                // Check if we're in a secure context (HTTPS or localhost)
+                const isSecure = window.location.protocol === 'https:' || 
+                               window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1';
+                
+                if (!isSecure) {
+                    console.warn('App is not running in a secure context. Some features may not work.');
+                }
+                
+                // Show app is ready
+                console.log('App initialized successfully');
+                
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                alert('Error loading the application. Please check the console for details.');
+            }
+        }
         
-        // Initialize the app after all scripts are loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if we're in a secure context (HTTPS or localhost)
-            const isSecure = window.location.protocol === 'https:' || 
-                           window.location.hostname === 'localhost' || 
-                           window.location.hostname === '127.0.0.1';
-            
-            if (!isSecure) {
-                console.warn('App is not running in a secure context. Some features may not work.');
-            }
-            
-            // Initialize the app
-            if (typeof App !== 'undefined') {
-                App.init();
-            }
-        });
+        // Start the app initialization
+        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
