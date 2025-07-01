@@ -77,29 +77,104 @@ const AnimalInfoManager = (function() {
     function getCurrentLocation() {
         UIManager.toggleButtonLoading(getLocationBtn, true);
         
+        // Check if using HTTPS or localhost (required for geolocation in modern browsers)
+        const isSecureContext = window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+                           
+        if (!isSecureContext) {
+            console.error('Geolocation requires HTTPS');
+            UIManager.toggleButtonLoading(getLocationBtn, false);
+            UIManager.showNotification('Geolocation requires HTTPS. Please use a secure connection.', 'error');
+            return;
+        }
+        
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    gpsLatitudeInput.value = position.coords.latitude.toFixed(6);
-                    gpsLongitudeInput.value = position.coords.longitude.toFixed(6);
-                    UIManager.toggleButtonLoading(getLocationBtn, false);
-                    UIManager.showNotification('Location updated successfully', 'success');
-                },
-                (error) => {
-                    console.error('Error getting location:', error);
-                    UIManager.toggleButtonLoading(getLocationBtn, false);
-                    UIManager.showNotification('Failed to get location. Please enter manually.', 'error');
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
+            try {
+                navigator.permissions.query({name: 'geolocation'})
+                    .then(permissionStatus => {
+                        console.log('Geolocation permission status:', permissionStatus.state);
+                        
+                        if (permissionStatus.state === 'denied') {
+                            UIManager.toggleButtonLoading(getLocationBtn, false);
+                            UIManager.showNotification('Location permission denied. Please enable in browser settings.', 'error');
+                            return;
+                        }
+                        
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                console.log('Got position:', position.coords);
+                                gpsLatitudeInput.value = position.coords.latitude.toFixed(6);
+                                gpsLongitudeInput.value = position.coords.longitude.toFixed(6);
+                                UIManager.toggleButtonLoading(getLocationBtn, false);
+                                UIManager.showNotification('Location updated successfully', 'success');
+                            },
+                            (error) => {
+                                console.error('Error getting location:', error);
+                                let errorMessage = 'Failed to get location. ';
+                                
+                                switch(error.code) {
+                                    case error.PERMISSION_DENIED:
+                                        errorMessage += 'Location permission denied.';
+                                        break;
+                                    case error.POSITION_UNAVAILABLE:
+                                        errorMessage += 'Location information is unavailable.';
+                                        break;
+                                    case error.TIMEOUT:
+                                        errorMessage += 'Location request timed out.';
+                                        break;
+                                    default:
+                                        errorMessage += 'Unknown error occurred.';
+                                }
+                                
+                                UIManager.toggleButtonLoading(getLocationBtn, false);
+                                UIManager.showNotification(errorMessage, 'error');
+                            },
+                            {
+                                enableHighAccuracy: true,
+                                timeout: 15000,
+                                maximumAge: 0
+                            }
+                        );
+                    })
+                    .catch(error => {
+                        console.error('Error checking permission:', error);
+                        // Fall back to standard geolocation request
+                        fallbackGeolocation();
+                    });
+            } catch (error) {
+                console.error('Error with permissions API:', error);
+                // Fallback if permissions API is not available
+                fallbackGeolocation();
+            }
         } else {
             UIManager.toggleButtonLoading(getLocationBtn, false);
             UIManager.showNotification('Geolocation is not supported by this browser.', 'error');
         }
+    }
+    
+    /**
+     * Fallback geolocation function when permissions API is not available
+     */
+    function fallbackGeolocation() {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                gpsLatitudeInput.value = position.coords.latitude.toFixed(6);
+                gpsLongitudeInput.value = position.coords.longitude.toFixed(6);
+                UIManager.toggleButtonLoading(getLocationBtn, false);
+                UIManager.showNotification('Location updated successfully', 'success');
+            },
+            (error) => {
+                console.error('Error getting location (fallback):', error);
+                UIManager.toggleButtonLoading(getLocationBtn, false);
+                UIManager.showNotification('Failed to get location. Please check browser permissions.', 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }
+        );
     }
     
     /**

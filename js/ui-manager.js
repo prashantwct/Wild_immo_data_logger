@@ -85,12 +85,34 @@ const UIManager = (function() {
         }
     }
     
+    // Toggle loading state for a specific button
+    function toggleButtonLoading(button, isLoading) {
+        if (!button) return;
+        
+        if (isLoading) {
+            // Store original text
+            button.dataset.originalText = button.textContent;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            button.disabled = true;
+        } else {
+            // Restore original text if exists
+            if (button.dataset.originalText) {
+                button.textContent = button.dataset.originalText;
+                delete button.dataset.originalText;
+            } else {
+                button.textContent = 'Done';
+            }
+            button.disabled = false;
+        }
+    }
+    
     // Public API
     return {
         initTabs,
         showTab,
         showNotification,
         setLoading,
+        toggleButtonLoading,
         getCurrentTab: () => currentTab
     };
 })();
