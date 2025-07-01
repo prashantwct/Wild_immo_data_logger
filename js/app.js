@@ -3,30 +3,82 @@
  * Initializes and coordinates all modules
  */
 
+// Define the App namespace
+const App = {};
+
 // Global variables
 window.estimatedWeight = 0;
 
+// Initialize the application
+App.init = function() {
+    console.log('App initialization started');
+    
+    try {
+        // Initialize UI manager
+        if (typeof UIManager !== 'undefined') {
+            console.log('Initializing UI Manager');
+            UIManager.initTabs();
+        } else {
+            console.error('UIManager not found');
+        }
+        
+        // Initialize all modules
+        if (typeof AnimalInfoManager !== 'undefined') {
+            console.log('Initializing Animal Info Manager');
+            AnimalInfoManager.init();
+        }
+        
+        if (typeof DrugDoseManager !== 'undefined') {
+            console.log('Initializing Drug Dose Manager');
+            DrugDoseManager.init();
+        }
+        
+        if (typeof MonitoringManager !== 'undefined') {
+            console.log('Initializing Monitoring Manager');
+            MonitoringManager.init();
+        }
+        
+        if (typeof RecoveryManager !== 'undefined') {
+            console.log('Initializing Recovery Manager');
+            RecoveryManager.init();
+        }
+        
+        if (typeof MorphometryManager !== 'undefined') {
+            console.log('Initializing Morphometry Manager');
+            MorphometryManager.init();
+        }
+        
+        // Set up export functionality
+        console.log('Setting up export functionality');
+        setupExportFunctionality();
+        
+        // Setup saved sessions
+        if (typeof SavedSessions !== 'undefined') {
+            console.log('Initializing Saved Sessions');
+            SavedSessions.init();
+        }
+        
+        // Set up Progressive Web App functionality
+        console.log('Setting up PWA functionality');
+        setupPWA();
+        
+        // Show welcome notification
+        setTimeout(() => {
+            if (typeof UIManager !== 'undefined') {
+                UIManager.showNotification('Welcome to Wildlife Immobilization Logger', 'info', 3000);
+            }
+        }, 500);
+        
+        console.log('App initialization completed successfully');
+    } catch (error) {
+        console.error('Error during app initialization:', error);
+    }
+};
+
+// Start the app when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize UI manager
-    UIManager.initTabs();
-    
-    // Initialize all modules
-    AnimalInfoManager.init();
-    DrugDoseManager.init();
-    MonitoringManager.init();
-    RecoveryManager.init();
-    MorphometryManager.init();
-    
-    // Set up export functionality
-    setupExportFunctionality();
-    
-    // Check if app can be installed as PWA
-    setupPWA();
-    
-    // Show welcome notification
-    setTimeout(() => {
-        UIManager.showNotification('Welcome to Wildlife Immobilization Logger', 'info', 3000);
-    }, 500);
+    console.log('DOM loaded, starting app initialization');
+    App.init();
 });
 
 /**
@@ -88,14 +140,27 @@ function setupPWA() {
     // Register service worker if supported
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('service-worker.js')
+            const swUrl = 'service-worker.js'; // Use relative path
+            console.log('Attempting to register service worker at:', swUrl);
+            navigator.serviceWorker.register(swUrl)
                 .then(registration => {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 })
                 .catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
+                    console.error('ServiceWorker registration failed: ', err);
+                    // Try a different path if the first one fails
+                    console.log('Trying alternative service worker path...');
+                    navigator.serviceWorker.register('./service-worker.js')
+                        .then(reg => {
+                            console.log('ServiceWorker registration successful with alternative path, scope:', reg.scope);
+                        })
+                        .catch(error => {
+                            console.error('ServiceWorker registration failed with alternative path:', error);
+                        });
                 });
         });
+    } else {
+        console.warn('Service workers are not supported in this browser');
     }
     
     // Handle PWA install prompt
